@@ -1,0 +1,68 @@
+
+@startuml
+skinparam classAttributeIconSize 0
+
+class Main {
+    + main(args: String[]): void
+}
+
+class HomeTheaterFacade {
+    - amplifier: Amplifier
+    - dvdPlayer: DvdPlayer
+    - lights: Lights
+    - projector: Projector
+    - screen: Screen
+    - moviePlaying: boolean
+    + watchMovie(movie: String): void
+    + endMovie(): void
+    + isMoviePlaying(): boolean
+}
+
+class Amplifier {
+    + turnOn(): void
+    + setVolume(volume: int): void
+    + turnOff(): void
+    + isPoweredOn(): boolean
+}
+
+class DvdPlayer {
+    + turnOn(): void
+    + play(movie: String): void
+    + stop(): void
+    + turnOff(): void
+}
+
+class Lights {
+    + dim(level: int): void
+    + turnOn(): void
+    + getBrightness(): int
+}
+
+class Projector {
+    + turnOn(): void
+    + setWideScreenMode(): void
+    + turnOff(): void
+}
+
+class Screen {
+    + down(): void
+    + up(): void
+    + isLowered(): boolean
+}
+
+class HomeTheaterException {
+    + HomeTheaterException(message: String, cause: Throwable)
+}
+
+Main ..> HomeTheaterFacade : uses
+
+HomeTheaterFacade --> Amplifier
+HomeTheaterFacade --> DvdPlayer
+HomeTheaterFacade --> Lights
+HomeTheaterFacade --> Projector
+HomeTheaterFacade --> Screen
+
+HomeTheaterFacade ..> HomeTheaterException : throws
+HomeTheaterException --|> RuntimeException
+
+@enduml
