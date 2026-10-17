@@ -1,6 +1,7 @@
 
 package com.hometheater.facade;
 
+import com.hometheater.exception.HomeTheaterException;
 import com.hometheater.subsystem.Amplifier;
 import com.hometheater.subsystem.DvdPlayer;
 import com.hometheater.subsystem.Lights;
@@ -32,6 +33,7 @@ public class HomeTheaterFacade {
     }
 
     public void watchMovie(String movie) {
+
         if (moviePlaying) {
             throw new IllegalStateException(
                     "A movie is already playing"
@@ -44,26 +46,68 @@ public class HomeTheaterFacade {
             );
         }
 
-        System.out.println("Preparing home theater...");
+        try {
+            System.out.println("Preparing home theater...");
 
-        lights.dim(20);
-        screen.down();
+            lights.dim(20);
+            screen.down();
 
-        projector.turnOn();
-        projector.setWideScreenMode();
+            projector.turnOn();
+            projector.setWideScreenMode();
 
-        amplifier.turnOn();
-        amplifier.setVolume(50);
+            amplifier.turnOn();
+            amplifier.setVolume(50);
 
-        dvdPlayer.turnOn();
-        dvdPlayer.play(movie);
+            dvdPlayer.turnOn();
+            dvdPlayer.play(movie);
 
-        moviePlaying = true;
+            moviePlaying = true;
 
-        System.out.println("Enjoy your movie!");
+            System.out.println("Enjoy your movie!");
+
+        } catch (RuntimeException exception) {
+
+            moviePlaying = false;
+
+            try {
+                dvdPlayer.turnOff();
+            } catch (RuntimeException cleanupException) {
+                exception.addSuppressed(cleanupException);
+            }
+
+            try {
+                amplifier.turnOff();
+            } catch (RuntimeException cleanupException) {
+                exception.addSuppressed(cleanupException);
+            }
+
+            try {
+                projector.turnOff();
+            } catch (RuntimeException cleanupException) {
+                exception.addSuppressed(cleanupException);
+            }
+
+            try {
+                screen.up();
+            } catch (RuntimeException cleanupException) {
+                exception.addSuppressed(cleanupException);
+            }
+
+            try {
+                lights.turnOn();
+            } catch (RuntimeException cleanupException) {
+                exception.addSuppressed(cleanupException);
+            }
+
+            throw new HomeTheaterException(
+                    "Failed to start movie: " + movie,
+                    exception
+            );
+        }
     }
 
     public void endMovie() {
+
         if (!moviePlaying) {
             throw new IllegalStateException(
                     "No movie is currently playing"
