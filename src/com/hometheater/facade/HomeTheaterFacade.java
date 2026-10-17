@@ -17,6 +17,18 @@ public class HomeTheaterFacade {
 
     private boolean moviePlaying = false;
 
+
+    public HomeTheaterFacade() {
+        this(
+                new Amplifier(),
+                new DvdPlayer(),
+                new Lights(),
+                new Projector(),
+                new Screen()
+        );
+    }
+
+
     public HomeTheaterFacade(
             Amplifier amplifier,
             DvdPlayer dvdPlayer,
